@@ -44,7 +44,7 @@ interface PreviewItem {
   favicon: string;
 }
 
-const SortableItem = ({ item, onRemove }: { item: PreviewItem, onRemove: (id: string) => void }) => {
+const SortableItem = ({ item, onRemove, bannerSize, showDescription }: { item: PreviewItem, onRemove: (id: string) => void, bannerSize: string, showDescription: boolean }) => {
   const {
     attributes,
     listeners,
@@ -54,59 +54,100 @@ const SortableItem = ({ item, onRemove }: { item: PreviewItem, onRemove: (id: st
     isDragging,
   } = useSortable({ id: item.id });
 
+  const innerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (innerRef.current) {
+      gsap.fromTo(innerRef.current, 
+        { opacity: 0, y: 30, scale: 0.9 },
+        { opacity: 1, y: 0, scale: 1, duration: 0.6, ease: "back.out(1.7)" }
+      );
+    }
+  }, []);
+
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    ...(isDragging ? { zIndex: 50 } : {})
+    ...(isDragging ? { zIndex: 50, position: 'relative' as const } : {})
   };
 
+  const bannerClass = bannerSize === 'compact' ? 'h-32 sm:h-40' : bannerSize === 'hero' ? 'aspect-[4/3] sm:aspect-square' : 'aspect-video w-full';
+
   return (
-    <div 
-      ref={setNodeRef} 
-      style={style}
-      className={`preview-card group relative bg-slate-900/40 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-md hover:border-cyan-500/30 transition-shadow ${
-        isDragging ? 'shadow-2xl shadow-cyan-500/20 border-cyan-500/50' : ''
-      }`}
-    >
-      <div className="aspect-video w-full relative overflow-hidden">
-        <img src={item.image} alt="" className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" />
-        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-transparent to-transparent opacity-60" />
-        
-        {/* Metadata Overlay */}
-        <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between">
-          <div className="flex items-center gap-3">
-            <img src={item.favicon} alt="" className="w-8 h-8 rounded-lg bg-white/10 p-1 backdrop-blur-md" />
-            <div>
-              <h3 className="text-sm font-bold text-white truncate max-w-[150px] sm:max-w-xs">{item.title}</h3>
-              <p className="text-[10px] text-slate-400 truncate max-w-[150px] sm:max-w-xs">{item.url}</p>
+    <div ref={setNodeRef} style={style} className={isDragging ? 'z-50' : ''}>
+      <div 
+        ref={innerRef}
+        className={`preview-card group relative bg-slate-900/40 border border-white/10 rounded-2xl overflow-hidden backdrop-blur-md hover:border-cyan-500/30 transition-shadow ${
+          isDragging ? 'shadow-2xl shadow-cyan-500/20 border-cyan-500/50' : ''
+        }`}
+      >
+        <div className={`relative overflow-hidden select-none w-full ${bannerClass}`}>
+          <img 
+            src={item.image} 
+            alt="" 
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700 pointer-events-none" 
+            draggable={false} 
+            onDragStart={(e) => e.preventDefault()}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-900/40 to-transparent opacity-60 group-hover:opacity-80 transition-opacity duration-500" />
+          
+          {/* Metadata Overlay */}
+          <div className="absolute bottom-0 left-0 right-0 p-4 flex flex-col justify-end h-full">
+            <div className={`mt-auto transition-all duration-500 transform ${showDescription ? 'translate-y-8 group-hover:translate-y-0' : ''}`}>
+              <div className="flex items-end justify-between mb-2 gap-4">
+                <div className="flex items-center gap-3 flex-1 min-w-0">
+                  <img 
+                    src={item.favicon} 
+                    alt="" 
+                    className="w-8 h-8 rounded-lg bg-white/10 p-1 backdrop-blur-md pointer-events-none shrink-0" 
+                    draggable={false} 
+                    onDragStart={(e) => e.preventDefault()}
+                  />
+                  <div className="flex-1 min-w-0">
+                    <h3 className="text-sm sm:text-base font-bold text-white truncate">{item.title}</h3>
+                    <p className="text-[10px] sm:text-xs text-slate-400 truncate">{item.url}</p>
+                  </div>
+                </div>
+                <div className="flex gap-2 shrink-0">
+                  <button 
+                    onPointerDown={(e) => e.stopPropagation()}
+                    className="p-2 bg-white/10 backdrop-blur-md rounded-lg hover:bg-white/20 transition-colors cursor-pointer"
+                  >
+                    <ExternalLink size={14} />
+                  </button>
+                  <button 
+                    onPointerDown={(e) => e.stopPropagation()}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onRemove(item.id);
+                    }}
+                    className="p-2 bg-red-500/10 backdrop-blur-md rounded-lg hover:bg-red-500/20 text-red-400 transition-colors cursor-pointer"
+                  >
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              </div>
+              
+              {showDescription && (
+                <div className="opacity-0 group-hover:opacity-100 h-0 group-hover:h-auto overflow-hidden transition-all duration-500 max-h-0 group-hover:max-h-24 pt-2">
+                  <p className="text-sm text-slate-300 line-clamp-2 md:line-clamp-3">
+                    {item.description}
+                  </p>
+                </div>
+              )}
             </div>
           </div>
-          <div className="flex gap-2">
-            <button className="p-2 bg-white/10 backdrop-blur-md rounded-lg hover:bg-white/20 transition-colors cursor-pointer">
-              <ExternalLink size={14} />
-            </button>
-            <button 
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={(e) => {
-                e.stopPropagation();
-                onRemove(item.id);
-              }}
-              className="p-2 bg-red-500/10 backdrop-blur-md rounded-lg hover:bg-red-500/20 text-red-400 transition-colors cursor-pointer"
-            >
-              <Trash2 size={14} />
-            </button>
-          </div>
         </div>
-      </div>
-      
-      {/* Drag Handle */}
-      <div 
-        {...attributes} 
-        {...listeners}
-        className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing"
-      >
-        <div className="bg-slate-950/50 p-1.5 rounded-md backdrop-blur-md border border-white/10">
-          <GripVertical size={16} className="text-slate-400" />
+        
+        {/* Drag Handle */}
+        <div 
+          {...attributes} 
+          {...listeners}
+          className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity cursor-grab active:cursor-grabbing z-20"
+        >
+          <div className="bg-slate-950/50 p-1.5 rounded-md backdrop-blur-md border border-white/10">
+            <GripVertical size={16} className="text-slate-400" />
+          </div>
         </div>
       </div>
     </div>
@@ -161,8 +202,10 @@ export default function App() {
     return saved ? JSON.parse(saved) : {
       quality: 80,
       size: 'medium',
+      bannerSize: 'standard',
       format: 'markdown',
-      showMetadata: true
+      showMetadata: true,
+      showDescription: false
     };
   });
   const [copied, setCopied] = useState(false);
@@ -174,16 +217,6 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem('lnk_prv_settings', JSON.stringify(settings));
   }, [settings]);
-
-  // --- Animations ---
-  useEffect(() => {
-    if (previews.length > 0) {
-      gsap.fromTo(".preview-card", 
-        { opacity: 0, y: 30, scale: 0.9 },
-        { opacity: 1, y: 0, scale: 1, duration: 0.6, stagger: 0.1, ease: "back.out(1.7)" }
-      );
-    }
-  }, [previews.length]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -252,7 +285,7 @@ export default function App() {
     const text = previews.map(p => 
       settings.format === 'markdown' ? `![${p.title}](${p.image})` : `<img src="${p.image}" alt="${p.title}" />`
     ).join('\n');
-    navigator.clipboard.writeText(text);
+    navigator.clipboard.writeText(text).catch(err => console.error("Clipboard err:", err));
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -331,7 +364,13 @@ export default function App() {
               )}
               
               {previews.map((item) => (
-                <SortableItem key={item.id} item={item} onRemove={removePreview} />
+                <SortableItem 
+                  key={item.id} 
+                  item={item} 
+                  onRemove={removePreview} 
+                  bannerSize={settings.bannerSize || 'standard'}
+                  showDescription={settings.showDescription || false}
+                />
               ))}
             </section>
           </SortableContext>
@@ -389,6 +428,41 @@ export default function App() {
                   value={settings.quality}
                   onChange={(e) => setSettings({...settings, quality: parseInt(e.target.value)})}
                 />
+              </div>
+
+              {/* Banner Size Toggle */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium">Banner Size</p>
+                  <p className="text-xs text-slate-500">Thumbnail aspect ratio</p>
+                </div>
+                <div className="flex bg-slate-800 p-1 rounded-xl border border-white/5">
+                  {['compact', 'standard', 'hero'].map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => setSettings({...settings, bannerSize: s})}
+                      className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-all ${
+                        settings.bannerSize === s || (!settings.bannerSize && s === 'standard') ? 'bg-cyan-500 text-slate-950 shadow-lg' : 'text-slate-400 hover:text-white'
+                      }`}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Show Description Toggle */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium">Show Description</p>
+                  <p className="text-xs text-slate-500">Display metadata overlay</p>
+                </div>
+                <button
+                  onClick={() => setSettings({...settings, showDescription: !settings.showDescription})}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${settings.showDescription ? 'bg-cyan-500' : 'bg-slate-700'}`}
+                >
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition duration-200 ease-in-out ${settings.showDescription ? 'translate-x-6' : 'translate-x-1'}`} />
+                </button>
               </div>
 
               {/* Format Toggle */}
