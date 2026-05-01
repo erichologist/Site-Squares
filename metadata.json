@@ -1,0 +1,6 @@
+{
+  "name": "Link Preview Generator",
+  "description": "A premium link preview generator using GSAP for cinematic animations and Tailwind CSS for glassmorphism.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
