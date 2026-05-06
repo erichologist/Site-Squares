@@ -299,12 +299,12 @@ export default function App() {
       </div>
 
       {/* Header */}
-      <header className="sticky top-0 z-40 backdrop-blur-xl bg-slate-950/70 border-b border-white/10 px-6 py-4 flex justify-between items-center">
+      <header className="sticky top-0 z-40 backdrop-blur-xl bg-slate-950/70 border-b border-white/10 px-6 py-4 flex justify-between items-center font-mono">
         <div className="flex items-center gap-2">
           <div className="w-8 h-8 bg-gradient-to-br from-cyan-400 to-blue-600 rounded-lg flex items-center justify-center shadow-lg shadow-cyan-500/20">
             <Layers size={18} className="text-white" />
           </div>
-          <h1 className="text-lg font-bold tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
+          <h1 className="text-lg font-bold font-mono tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-white to-slate-400">
             LNK.PRV
           </h1>
         </div>
@@ -316,7 +316,7 @@ export default function App() {
         </button>
       </header>
 
-      <main className="max-w-2xl mx-auto p-6 pb-32">
+      <main className="max-w-2xl mx-auto p-6 pb-32 font-mono">
         {/* Input Section */}
         <section className="mb-10">
           <div className="relative group">
@@ -324,12 +324,12 @@ export default function App() {
               value={urls}
               onChange={(e) => setUrls(e.target.value)}
               placeholder="Paste multiple URLs here..."
-              className="w-full h-32 bg-slate-900/50 border border-white/10 rounded-2xl p-4 text-sm focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 outline-none transition-all placeholder:text-slate-600 backdrop-blur-sm"
+              className="w-full h-32 bg-slate-900/50 border border-white/10 rounded-2xl p-4 text-sm font-mono focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 outline-none transition-all placeholder:text-slate-600 backdrop-blur-sm"
             />
             <button 
               onClick={handleProcess}
               disabled={isGenerating}
-              className={`absolute bottom-4 right-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 px-4 py-2 rounded-xl font-bold text-sm flex items-center gap-2 transition-all active:scale-95 shadow-lg shadow-cyan-500/20 z-10 ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}`}
+              className={`absolute bottom-4 right-4 bg-cyan-500 hover:bg-cyan-400 text-slate-950 px-4 py-2 rounded-xl font-bold font-mono text-sm flex items-center gap-2 transition-all active:scale-95 shadow-lg shadow-cyan-500/20 z-10 ${isGenerating ? 'opacity-50 cursor-not-allowed' : ''}`}
             >
               {isGenerating ? (
                 <div className="flex items-center gap-2">
@@ -357,7 +357,7 @@ export default function App() {
           >
             <section className="space-y-4" ref={galleryRef}>
               {previews.length === 0 && (
-                <div className="text-center py-20 border-2 border-dashed border-white/5 rounded-3xl">
+                <div className="text-center py-20 border-2 border-dashed border-white/5 rounded-3xl font-mono">
                   <ImageIcon className="mx-auto text-slate-700 mb-4" size={48} />
                   <p className="text-slate-500">No previews generated yet.</p>
                 </div>
@@ -407,7 +407,7 @@ export default function App() {
           <div className="absolute inset-0" onClick={toggleSheet} />
           <div 
             ref={sheetRef}
-            className="relative w-full max-w-lg bg-slate-900 border-t border-white/20 rounded-t-[32px] p-8 transform translate-y-full shadow-2xl"
+            className="relative w-full max-w-lg bg-slate-900 border-t border-white/20 rounded-t-[32px] p-8 transform translate-y-full shadow-2xl font-mono"
           >
             <div className="w-12 h-1.5 bg-slate-700 rounded-full mx-auto mb-8" />
             
